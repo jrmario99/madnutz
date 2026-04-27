@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../**/*.vue';
+
+@theme {
+    /* MadNutz Design System — cores reais do site */
+    --color-mn-red:    #C82830;
+    --color-mn-black:  #000000;
+    --color-mn-white:  #FFFFFF;
+    --color-mn-yellow: #FFDF00;
+    --color-mn-orange: #EF841A;
+    --color-mn-gray:   #4C4C4C;
+
+    --font-heading: 'Passion One', sans-serif;
+    --font-body:    'Readex Pro', sans-serif;
+}
+
+@layer base {
+    body {
+        font-family: var(--font-body);
+        background-color: #fff;
+        color: #000;
+    }
+    h1, h2, h3, h4 {
+        font-family: var(--font-heading);
+        text-transform: uppercase;
+    }
+}
+
+@layer components {
+    .btn-red {
+        @apply bg-mn-red text-white font-bold uppercase px-6 py-3 rounded-full tracking-wide hover:bg-red-700 transition-colors cursor-pointer;
+        font-family: var(--font-body);
+    }
+    .btn-black {
+        @apply bg-mn-black text-white font-bold uppercase px-6 py-3 rounded-full tracking-wide hover:bg-mn-gray transition-colors cursor-pointer;
+        font-family: var(--font-body);
+    }
+    .btn-yellow {
+        @apply bg-mn-yellow text-mn-black font-bold uppercase px-6 py-3 rounded-full tracking-wide hover:opacity-90 transition-opacity cursor-pointer;
+        font-family: var(--font-body);
+    }
+    .kit-card {
+        @apply bg-white rounded-2xl overflow-hidden flex flex-col;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+}
