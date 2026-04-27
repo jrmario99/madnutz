@@ -30,7 +30,7 @@ Route::post('orders', [OrderController::class, 'store']);
 Route::post('webhooks/b4you', [WebhookController::class, 'b4you']);
 
 // Auth
-Route::post('auth/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->post('auth/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('auth/me', [AuthController::class, 'me']);
     Route::post('auth/logout', [AuthController::class, 'logout']);
@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // ── Área do Cliente ──────────────────────────────────────────────────────────
 // Público: registro e login
-Route::prefix('customer/auth')->group(function () {
+Route::prefix('customer/auth')->middleware('throttle:5,1')->group(function () {
     Route::post('register',        [CustomerAuthController::class, 'register']);
     Route::post('login-password',  [CustomerAuthController::class, 'loginPassword']);
     Route::post('send-otp',        [CustomerAuthController::class, 'sendOtp']);

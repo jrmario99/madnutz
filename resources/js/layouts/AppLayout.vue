@@ -57,20 +57,19 @@ function navTo(anchor) {
                 </nav>
 
                 <!-- Cart + menu -->
-                <div class="flex items-center gap-3">
-                    <!-- Botão PEDIDOS formato ticket igual ao original -->
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Botão PEDIDOS — ticket no desktop, ícone compacto no mobile -->
+                    <!-- Desktop: ticket SVG -->
                     <router-link
                         to="/carrinho"
-                        class="relative inline-block"
+                        class="relative hidden sm:inline-block"
                         style="width:137px; height:60px;"
                         @mouseenter="pedidosHover = true"
                         @mouseleave="pedidosHover = false"
                     >
-                        <!-- Forma ticket SVG -->
                         <svg viewBox="0 0 137 60" class="absolute inset-0 w-full h-full" :fill="pedidosHover ? '#ffffff' : '#000000'" xmlns="http://www.w3.org/2000/svg">
                             <path d="M11.5828 47.0875C13.7502 44.136 13.513 40.0604 11.0177 37.3804L4.95929 30.8734C-5.9737 19.1309 2.35349 0 18.3977 0H121.599C130.491 0 135.295 10.4228 129.52 17.1837C125.99 21.3149 126.229 27.4647 130.068 31.3099L132.117 33.3631C140.647 41.9076 134.595 56.5 122.522 56.5H73.3638L18.1013 59.2141C11.6892 59.5291 7.78287 52.262 11.5828 47.0875Z"/>
                         </svg>
-                        <!-- Conteúdo -->
                         <span class="absolute inset-0 flex items-center justify-center gap-2 z-10"
                               :style="{ color: pedidosHover ? '#000' : '#fff', fontFamily: '\'Passion One\', sans-serif', fontSize: '18px', fontWeight: '500' }">
                             <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 448 512" fill="currentColor">
@@ -78,8 +77,19 @@ function navTo(anchor) {
                             </svg>
                             PEDIDOS
                         </span>
-                        <!-- Badge contador -->
                         <span v-if="count > 0" class="absolute -top-1 -right-1 bg-mn-yellow text-mn-black text-xs font-black w-5 h-5 flex items-center justify-center rounded-full leading-none z-20">
+                            {{ count > 9 ? '9+' : count }}
+                        </span>
+                    </router-link>
+
+                    <!-- Mobile: botão compacto -->
+                    <router-link to="/carrinho"
+                        class="relative sm:hidden flex items-center justify-center w-11 h-11 rounded-xl"
+                        style="background:#000;">
+                        <svg class="w-5 h-5" viewBox="0 0 448 512" fill="white">
+                            <path d="M352 160v-32C352 57.42 294.579 0 224 0 153.42 0 96 57.42 96 128v32H0v272c0 44.183 35.817 80 80 80h288c44.183 0 80-35.817 80-80V160h-96zm-192-32c0-35.29 28.71-64 64-64s64 28.71 64 64v32H160v-32zm160 120c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24zm-192 0c-13.255 0-24-10.745-24-24s10.745-24 24-24 24 10.745 24 24-10.745 24-24 24z"/>
+                        </svg>
+                        <span v-if="count > 0" class="absolute -top-1 -right-1 bg-mn-yellow text-mn-black text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full leading-none z-20">
                             {{ count > 9 ? '9+' : count }}
                         </span>
                     </router-link>

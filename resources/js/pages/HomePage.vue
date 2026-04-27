@@ -8,9 +8,17 @@ const router = useRouter();
 const kits   = ref([]);
 
 // ── Carousel ─────────────────────────────────────────────────────────────────
-const CARD_W  = 340;
 const CARD_GAP = 24;
-const STEP    = CARD_W + CARD_GAP;
+
+// Card width adapts to screen size
+function getCardW() {
+    if (typeof window === 'undefined') return 340;
+    if (window.innerWidth < 400) return window.innerWidth - 60;
+    if (window.innerWidth < 640) return 300;
+    return 340;
+}
+const CARD_W = ref(getCardW());
+const STEP   = computed(() => CARD_W.value + CARD_GAP);
 
 const currentIndex = ref(0);
 const tiltX        = ref(0);
@@ -33,7 +41,7 @@ const progress = computed(() => {
 const trackStyle = computed(() => ({
     display:    'flex',
     gap:        `${CARD_GAP}px`,
-    transform:  `translateX(calc(50% - ${currentIndex.value * STEP + CARD_W / 2}px + ${dragDelta.value}px))`,
+    transform:  `translateX(calc(50% - ${currentIndex.value * STEP.value + CARD_W.value / 2}px + ${dragDelta.value}px))`,
     transition: isDragging.value ? 'none' : 'transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     willChange: 'transform',
     cursor:     isDragging.value ? 'grabbing' : 'grab',
@@ -43,7 +51,7 @@ const trackStyle = computed(() => ({
 function cardWrapStyle(i) {
     const dist = Math.abs(i - currentIndex.value);
     return {
-        width:          `${CARD_W}px`,
+        width:          `${CARD_W.value}px`,
         flexShrink:     0,
         position:       'relative',
         transform:      `scale(${dist === 0 ? 1 : dist === 1 ? 0.87 : 0.75})`,
@@ -119,8 +127,12 @@ onMounted(async () => {
         kits.value = res.data;
     } catch {}
     startAuto();
+    window.addEventListener('resize', () => { CARD_W.value = getCardW(); });
 });
-onUnmounted(() => clearInterval(autoTimer));
+onUnmounted(() => {
+    clearInterval(autoTimer);
+    window.removeEventListener('resize', () => { CARD_W.value = getCardW(); });
+});
 
 const fmt = v => Number(v).toFixed(2).replace('.', ',');
 
@@ -409,22 +421,20 @@ function openCustomKit() {
 
                     <!-- Prev arrow -->
                     <button @click="prev"
-                            class="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-0.5 px-3 py-4 transition-all duration-200"
+                            class="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex items-center px-3 py-4 transition-all duration-200"
                             style="color:rgba(255,255,255,0.3);"
                             @mouseenter="$event.currentTarget.style.color='rgba(255,255,255,0.9)'"
                             @mouseleave="$event.currentTarget.style.color='rgba(255,255,255,0.3)'">
                         <i class="pi pi-angle-left" style="font-size:34px;" />
-                        <span style="font-family:'Passion One',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">ANT</span>
                     </button>
 
                     <!-- Next arrow -->
                     <button @click="next"
-                            class="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-0.5 px-3 py-4 transition-all duration-200"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex items-center px-3 py-4 transition-all duration-200"
                             style="color:rgba(255,255,255,0.3);"
                             @mouseenter="$event.currentTarget.style.color='rgba(255,255,255,0.9)'"
                             @mouseleave="$event.currentTarget.style.color='rgba(255,255,255,0.3)'">
                         <i class="pi pi-angle-right" style="font-size:34px;" />
-                        <span style="font-family:'Passion One',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;">PROX</span>
                     </button>
                 </div>
 

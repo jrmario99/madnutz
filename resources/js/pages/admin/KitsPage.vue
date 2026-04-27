@@ -2,8 +2,10 @@
     <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
             <h2 class="font-bold text-gray-700 uppercase text-sm tracking-widest">Kits</h2>
-            <Button label="Novo Kit" icon="pi pi-plus" @click="openNew" size="small"
-                    style="background:#C82830;border-color:#C82830" />
+            <button class="mn-btn-primary" @click="openNew">
+                <i class="pi pi-plus" style="font-size:13px;" />
+                Novo Kit
+            </button>
         </div>
 
         <DataTable :value="kits" :loading="loading" size="small" dataKey="id" :pt="tablePt">
@@ -52,158 +54,200 @@
             </Column>
         </DataTable>
 
-        <!-- Dialog -->
-        <Dialog v-model:visible="dialogVisible" :header="editing ? 'Editar Kit' : 'Novo Kit'"
-                modal :style="{ width: '760px', maxWidth: '95vw' }" :closable="true"
-                :pt="{ content: { style: 'padding: 0' } }">
+        <!-- Modal -->
+        <Teleport to="body">
+            <Transition name="mn-modal">
+                <div v-if="dialogVisible"
+                     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                     style="background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);"
+                     @mousedown.self="!saving && (dialogVisible = false)">
 
-            <div class="overflow-y-auto" style="max-height: calc(90vh - 140px);">
-                <div class="px-6 py-5 space-y-6">
+                    <div class="mn-modal-box w-full" style="max-width:860px;" @mousedown.stop>
 
-                    <!-- Seção: Informações básicas -->
-                    <div class="rounded-xl border border-gray-100 p-4 space-y-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Informações básicas</p>
-
-                        <div>
-                            <label class="field-label">Nome do Kit *</label>
-                            <InputText v-model="form.name" fluid placeholder="Ex: Kit Família" />
+                        <!-- Header -->
+                        <div class="mn-modal-header">
+                            <h3 class="mn-modal-title" style="font-size:1.25rem;font-weight:700;text-transform:none;letter-spacing:0;">
+                                <span v-if="editing">Editar Kit: <span style="color:#C82830;">{{ editing.name }}</span></span>
+                                <span v-else>Novo Kit</span>
+                            </h3>
+                            <button class="mn-modal-close" :disabled="saving" @click="dialogVisible = false">
+                                <i class="pi pi-times" style="font-size:14px;" />
+                            </button>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="field-label">Badge <span class="text-gray-400 font-normal">(ex: MAIS VENDIDO)</span></label>
-                                <InputText v-model="form.badge" fluid placeholder="Deixe vazio para ocultar" />
-                            </div>
-                            <div class="flex items-end pb-1">
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex items-center gap-3">
-                                        <ToggleSwitch v-model="form.active" />
-                                        <span class="text-sm font-medium text-gray-600">Kit ativo</span>
+                        <!-- Body: col esquerda (3fr) + direita (2fr) -->
+                        <div class="mn-modal-body">
+                            <div class="grid gap-6" style="grid-template-columns:3fr 2fr;">
+
+                                <!-- ── ESQUERDA: Info + Preços + Slots ── -->
+                                <div class="space-y-5">
+
+                                    <!-- Informações básicas -->
+                                    <div>
+                                        <p class="mn-section-title">Informações básicas</p>
+                                        <div class="space-y-3">
+                                            <div>
+                                                <label class="mn-label">Nome do Kit *</label>
+                                                <input v-model="form.name" class="mn-input" placeholder="Ex: Full Madness" />
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label class="mn-label">Badge</label>
+                                                    <input v-model="form.badge" class="mn-input" placeholder="Mais Vendido" />
+                                                </div>
+                                                <div>
+                                                    <label class="mn-label">Ordem</label>
+                                                    <InputNumber v-model="form.sort_order" class="mn-inputnumber" fluid :min="0" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="mn-label">Descrição</label>
+                                                <textarea v-model="form.description" rows="4"
+                                                          class="mn-input" style="resize:none;"
+                                                          placeholder="Frase curta exibida no card..." />
+                                            </div>
+                                            <div class="flex gap-6 pt-1">
+                                                <div class="mn-toggle-inline">
+                                                    <ToggleSwitch v-model="form.active" />
+                                                    <span>Kit Ativo</span>
+                                                </div>
+                                                <div class="mn-toggle-inline">
+                                                    <ToggleSwitch v-model="form.free_shipping" />
+                                                    <span>Frete Grátis</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <ToggleSwitch v-model="form.free_shipping" />
-                                        <span class="text-sm font-medium text-gray-600">Frete grátis</span>
+
+                                    <!-- Preços -->
+                                    <div>
+                                        <p class="mn-section-title">Preços</p>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <label class="mn-label">Preço normal *</label>
+                                                <InputNumber v-model="form.price" class="mn-inputnumber"
+                                                             fluid mode="currency" currency="BRL" locale="pt-BR" :min="0" />
+                                            </div>
+                                            <div>
+                                                <label class="mn-label">Oferta <span class="mn-label-hint">(opcional)</span></label>
+                                                <InputNumber v-model="form.sale_price" class="mn-inputnumber"
+                                                             fluid mode="currency" currency="BRL" locale="pt-BR" :min="0" />
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    <!-- Slots de sabores -->
+                                    <div>
+                                        <div class="flex items-center justify-between mb-3">
+                                            <p class="mn-section-title" style="margin-bottom:0;">Slots de sabores *</p>
+                                            <button class="mn-btn-slot-add" @click="addSlot">
+                                                <span class="mn-dot" />+ Novo Slot
+                                            </button>
+                                        </div>
+
+                                        <div v-if="form.slots.length === 0" class="mn-empty-state">
+                                            Adicione ao menos 1 slot.
+                                        </div>
+
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <div v-for="(slot, idx) in form.slots" :key="idx"
+                                                 class="mn-slot-card">
+                                                <label class="mn-label">Tamanho</label>
+                                                <Select v-model="slot.size" :options="availableSizes"
+                                                        placeholder="100g" class="mn-select" editable fluid />
+                                                <div class="flex items-center gap-2 mt-2">
+                                                    <InputNumber v-model="slot.quantity" :min="1"
+                                                                 class="mn-inputnumber flex-1" fluid showButtons />
+                                                    <button class="mn-btn-danger-icon flex-shrink-0" @click="removeSlot(idx)">
+                                                        <i class="pi pi-trash" style="font-size:12px;" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="formError" class="mn-error-box mt-3">
+                                            <i class="pi pi-exclamation-circle" style="font-size:14px;" />
+                                            {{ formError }}
+                                        </div>
+                                    </div>
+
                                 </div>
-                            </div>
-                        </div>
 
-                        <div>
-                            <label class="field-label">Descrição</label>
-                            <Textarea v-model="form.description" rows="2" fluid autoResize
-                                      placeholder="Descrição curta exibida no card" />
-                        </div>
-                    </div>
+                                <!-- ── DIREITA: Mídia ── -->
+                                <div>
+                                    <p class="mn-section-title">Mídia do produto</p>
 
-                    <!-- Seção: Preços -->
-                    <div class="rounded-xl border border-gray-100 p-4 space-y-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Preços</p>
+                                    <!-- Capa grande -->
+                                    <div class="relative rounded-2xl overflow-hidden cursor-pointer mb-3"
+                                         style="aspect-ratio:1;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.03);"
+                                         @click="triggerCoverUpload">
+                                        <img v-if="form.image" :src="form.image" class="w-full h-full object-cover" />
+                                        <div v-else class="w-full h-full flex flex-col items-center justify-center gap-2">
+                                            <i class="pi pi-image" style="font-size:36px;color:rgba(255,255,255,0.18);" />
+                                            <span style="font-size:11px;color:rgba(255,255,255,0.28);font-weight:600;">Clique para adicionar</span>
+                                        </div>
+                                        <!-- badge CAPA -->
+                                        <div v-if="form.image"
+                                             class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-white font-black uppercase"
+                                             style="background:#C82830;font-size:9px;letter-spacing:0.12em;">CAPA</div>
+                                        <!-- spinner upload -->
+                                        <div v-if="coverUploading"
+                                             class="absolute inset-0 flex items-center justify-center"
+                                             style="background:rgba(0,0,0,0.55);">
+                                            <i class="pi pi-spinner pi-spin" style="color:white;font-size:28px;" />
+                                        </div>
+                                    </div>
+                                    <input ref="coverInput" type="file" accept="image/*" class="hidden" @change="onCoverChange" />
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="field-label">Preço normal (R$) *</label>
-                                <InputNumber v-model="form.price" mode="currency" currency="BRL" locale="pt-BR" fluid :min="0" />
-                            </div>
-                            <div>
-                                <label class="field-label">
-                                    Preço de oferta (R$)
-                                    <span class="text-gray-400 font-normal ml-1">— vazio = sem oferta</span>
-                                </label>
-                                <InputNumber v-model="form.sale_price" mode="currency" currency="BRL" locale="pt-BR"
-                                             fluid :min="0" placeholder="Sem oferta" />
-                            </div>
-                        </div>
+                                    <!-- Galeria em linha -->
+                                    <div class="flex gap-2 flex-wrap">
+                                        <div v-for="(img, idx) in form.images" :key="idx"
+                                             class="relative group" style="width:64px;height:64px;flex-shrink:0;">
+                                            <div class="w-full h-full rounded-xl overflow-hidden cursor-pointer border-2 transition-all"
+                                                 :style="img.url ? 'border-color:#C82830' : 'border-color:#555;border-style:dashed'"
+                                                 @click="triggerGalleryReplace(idx)">
+                                                <img v-if="img.url" :src="img.url" class="w-full h-full object-cover" />
+                                                <div v-else class="w-full h-full flex items-center justify-center">
+                                                    <i class="pi pi-image" style="color:#666;font-size:16px;" />
+                                                </div>
+                                                <div v-if="galleryUploading && pendingGalleryIdx === idx"
+                                                     class="absolute inset-0 flex items-center justify-center"
+                                                     style="background:rgba(0,0,0,0.6);">
+                                                    <i class="pi pi-spinner pi-spin" style="color:white;font-size:14px;" />
+                                                </div>
+                                            </div>
+                                            <button class="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity font-bold text-white"
+                                                    style="background:#C82830;font-size:11px;line-height:1;z-index:2;"
+                                                    @click.stop="removeImage(idx)">&times;</button>
+                                        </div>
 
-                        <div v-if="form.sale_price" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm"
-                             style="background:#fff5f5;border:1px solid #fecaca;">
-                            <i class="pi pi-tag text-xs" style="color:#C82830" />
-                            <span style="color:#C82830">
-                                Oferta ativa — clientes verão
-                                <strong>R$ {{ fmtNum(form.sale_price) }}</strong>
-                                <span class="line-through ml-1 opacity-60">R$ {{ fmtNum(form.price) }}</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Seção: Imagens -->
-                    <div class="rounded-xl border border-gray-100 p-4 space-y-4">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Imagens</p>
-
-                        <!-- Imagem capa -->
-                        <div>
-                            <label class="field-label">Imagem capa</label>
-                            <ImageUpload v-model="form.image" />
-                        </div>
-
-                        <!-- Galeria -->
-                        <div>
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="field-label mb-0">Galeria (imagens do modal)</label>
-                                <Button icon="pi pi-plus" label="Adicionar" size="small" text @click="addImage" />
-                            </div>
-
-                            <div v-if="form.images.length === 0"
-                                 class="text-sm text-gray-400 py-4 text-center rounded-xl border border-dashed border-gray-200 bg-gray-50">
-                                Nenhuma imagem na galeria.
-                            </div>
-
-                            <div v-for="(img, idx) in form.images" :key="idx"
-                                 class="flex items-center gap-3 mb-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                                <div class="flex-1">
-                                    <ImageUpload v-model="img.url" />
+                                        <!-- botão + NOVA -->
+                                        <button class="mn-btn-nova flex-shrink-0" :disabled="galleryUploading"
+                                                @click="triggerAddGallery">
+                                            <i class="pi pi-plus" style="font-size:10px;color:#FFDF00;" />
+                                            <span>NOVA</span>
+                                        </button>
+                                    </div>
+                                    <input ref="galleryAddInput" type="file" accept="image/*" class="hidden" @change="onGalleryAdd" />
+                                    <input ref="galleryReplaceInput" type="file" accept="image/*" class="hidden" @change="onGalleryReplace" />
                                 </div>
-                                <Button icon="pi pi-trash" severity="danger" text rounded size="small" @click="removeImage(idx)" />
+
                             </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="mn-modal-footer">
+                            <button class="mn-btn-ghost" :disabled="saving" @click="dialogVisible = false">Cancelar</button>
+                            <button class="mn-btn-primary" :disabled="saving" @click="save">
+                                <i v-if="saving" class="pi pi-spinner pi-spin" style="font-size:13px;" />
+                                <i v-else class="pi pi-check" style="font-size:13px;" />
+                                {{ editing ? 'Salvar Alterações' : 'Criar Kit' }}
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Seção: Slots -->
-                    <div class="rounded-xl border border-gray-100 p-4 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Slots de sabores *</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Defina quantos itens de cada tamanho compõem o kit.</p>
-                            </div>
-                            <Button icon="pi pi-plus" label="Adicionar slot" size="small" text @click="addSlot" />
-                        </div>
-
-                        <div v-if="form.slots.length === 0"
-                             class="text-sm text-gray-400 py-4 text-center rounded-xl border border-dashed border-gray-200 bg-gray-50">
-                            Nenhum slot. Adicione ao menos 1.
-                        </div>
-
-                        <div v-for="(slot, idx) in form.slots" :key="idx"
-                             class="flex items-end gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                            <div class="flex-1">
-                                <label class="text-xs text-gray-500 mb-1 block font-medium">Tamanho</label>
-                                <Select v-model="slot.size" :options="availableSizes"
-                                        placeholder="Selecionar ou digitar" class="w-full" editable fluid />
-                            </div>
-                            <div class="w-36">
-                                <label class="text-xs text-gray-500 mb-1 block font-medium">Qtd. a escolher</label>
-                                <InputNumber v-model="slot.quantity" :min="1" fluid showButtons
-                                             decrementButtonClass="p-button-secondary"
-                                             incrementButtonClass="p-button-secondary" />
-                            </div>
-                            <Button icon="pi pi-trash" severity="danger" text rounded @click="removeSlot(idx)" />
-                        </div>
-
-                        <small v-if="formError" class="text-red-500 flex items-center gap-1">
-                            <i class="pi pi-exclamation-circle text-xs" /> {{ formError }}
-                        </small>
-                    </div>
-
                 </div>
-            </div>
-
-            <template #footer>
-                <div class="flex justify-end gap-2 px-6 py-4 border-t border-gray-100">
-                    <Button label="Cancelar" text severity="secondary" @click="dialogVisible = false" />
-                    <Button :label="editing ? 'Salvar alterações' : 'Criar Kit'" :loading="saving"
-                            @click="save" style="background:#C82830;border-color:#C82830" />
-                </div>
-            </template>
-        </Dialog>
+            </Transition>
+        </Teleport>
 
         <ConfirmDialog />
     </div>
@@ -214,10 +258,7 @@ import { ref, onMounted } from 'vue';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
-import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
-import Textarea from 'primevue/textarea';
 import ToggleSwitch from 'primevue/toggleswitch';
 import Select from 'primevue/select';
 import ImageUpload from '../../components/ImageUpload.vue';
@@ -251,7 +292,13 @@ const emptyForm = () => ({
     slots: [], images: [],
 });
 
-const form = ref(emptyForm());
+const form              = ref(emptyForm());
+const coverInput          = ref(null);
+const coverUploading      = ref(false);
+const galleryAddInput     = ref(null);
+const galleryReplaceInput = ref(null);
+const galleryUploading    = ref(false);
+const pendingGalleryIdx   = ref(-1);
 
 const fmt    = v => Number(v).toFixed(2).replace('.', ',');
 const fmtNum = v => v ? Number(v).toFixed(2).replace('.', ',') : '—';
@@ -295,10 +342,59 @@ function editKit(k) {
     dialogVisible.value = true;
 }
 
-function addSlot()  { form.value.slots.push({ size: '', quantity: 1 }); }
-function removeSlot(idx) { form.value.slots.splice(idx, 1); }
-function addImage() { form.value.images.push({ url: '', sort_order: form.value.images.length }); }
-function removeImage(idx) { form.value.images.splice(idx, 1); }
+function addSlot()         { form.value.slots.push({ size: '', quantity: 1 }); }
+function removeSlot(idx)   { form.value.slots.splice(idx, 1); }
+function removeImage(idx)  { form.value.images.splice(idx, 1); }
+
+function triggerCoverUpload() { coverInput.value?.click(); }
+async function onCoverChange(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    coverUploading.value = true;
+    try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await api.post('admin/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        form.value.image = res.data.url;
+    } finally {
+        coverUploading.value = false;
+    }
+}
+
+function triggerAddGallery()      { galleryAddInput.value?.click(); }
+function triggerGalleryReplace(idx) {
+    pendingGalleryIdx.value = idx;
+    galleryReplaceInput.value?.click();
+}
+
+async function uploadGalleryFile(file) {
+    galleryUploading.value = true;
+    try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await api.post('admin/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        return res.data.url;
+    } finally {
+        galleryUploading.value = false;
+    }
+}
+
+async function onGalleryAdd(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const url = await uploadGalleryFile(file);
+    if (url) form.value.images.push({ url, sort_order: form.value.images.length });
+}
+
+async function onGalleryReplace(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const url = await uploadGalleryFile(file);
+    if (url) form.value.images[pendingGalleryIdx.value].url = url;
+}
 
 async function save() {
     formError.value = '';
@@ -352,11 +448,211 @@ async function deleteKit(k) {
 </script>
 
 <style scoped>
-.field-label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #4B5563;
-    margin-bottom: 0.25rem;
+/* ── Botões ── */
+.mn-btn-primary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em;
+    background: #C82830; color: #FFDF00; border: none; cursor: pointer;
+    transition: opacity .15s, transform .1s;
 }
+.mn-btn-primary:hover { opacity: .88; }
+.mn-btn-primary:active { transform: scale(.97); }
+.mn-btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+.mn-btn-ghost {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    background: transparent; color: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.12); cursor: pointer;
+    transition: color .15s, border-color .15s;
+}
+.mn-btn-ghost:hover { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.3); }
+.mn-btn-ghost:disabled { opacity: .4; cursor: not-allowed; }
+
+.mn-btn-add {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 8px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+    background: rgba(200,40,48,0.15); color: #ff6060;
+    border: 1px solid rgba(200,40,48,0.3); cursor: pointer;
+    transition: background .15s;
+}
+.mn-btn-add:hover { background: rgba(200,40,48,0.25); }
+
+.mn-btn-danger-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(200,40,48,0.12); color: rgba(255,80,80,0.7);
+    border: 1px solid rgba(200,40,48,0.2); cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.mn-btn-danger-icon:hover { background: rgba(200,40,48,0.25); color: #ff5050; }
+
+/* ── Modal ── */
+.mn-modal-box {
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+}
+.mn-modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    background: linear-gradient(135deg, rgba(200,40,48,0.15) 0%, transparent 60%);
+}
+.mn-modal-eyebrow {
+    font-size: 10px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 0.25em; color: #C82830; margin-bottom: 4px;
+}
+.mn-modal-title {
+    font-family: 'Passion One', sans-serif;
+    font-size: 1.8rem; font-weight: 900; text-transform: uppercase;
+    color: #fff; line-height: 1; letter-spacing: 0.02em;
+}
+.mn-modal-close {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.4); cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.mn-modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.mn-modal-body { padding: 24px 28px; }
+.mn-modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    padding: 16px 28px 24px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ── Seções ── */
+.mn-section {
+    padding: 20px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+.mn-section-title {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 16px;
+    font-size: 10px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 0.2em; color: rgba(255,255,255,0.35);
+}
+
+/* ── Campos ── */
+.mn-label {
+    display: block; font-size: 10px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.4); margin-bottom: 7px;
+}
+.mn-label-hint { font-weight: 500; text-transform: none; letter-spacing: 0; color: rgba(255,255,255,0.25); }
+
+.mn-input {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: #fff; font-size: 14px; font-weight: 600;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.mn-input:focus { border-color: #C82830; box-shadow: 0 0 0 3px rgba(200,40,48,0.2); }
+
+:deep(.mn-inputnumber .p-inputtext),
+:deep(.mn-select .p-inputtext) {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: #fff !important; font-size: 14px; font-weight: 600;
+}
+:deep(.mn-inputnumber .p-inputtext:focus),
+:deep(.mn-select .p-inputtext:focus) {
+    border-color: #C82830 !important;
+    box-shadow: 0 0 0 3px rgba(200,40,48,0.2) !important;
+}
+:deep(.mn-inputnumber .p-inputnumber-button) {
+    background: rgba(255,255,255,0.07) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    color: rgba(255,255,255,0.5) !important;
+}
+:deep(.mn-select .p-select-dropdown) {
+    background: rgba(255,255,255,0.07) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    color: rgba(255,255,255,0.5) !important;
+}
+
+/* Slot card */
+.mn-slot-card {
+    padding: 12px; border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Slot row (legado) */
+.mn-slot-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px; border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* Botão + Novo Slot */
+.mn-btn-slot-add {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 8px;
+    font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em;
+    background: transparent; color: #FFDF00;
+    border: 1px solid rgba(255,223,0,0.3); cursor: pointer;
+    transition: background .15s;
+}
+.mn-btn-slot-add:hover { background: rgba(255,223,0,0.08); }
+.mn-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #FFDF00; display: inline-block; flex-shrink: 0;
+}
+
+/* Botão + NOVA (galeria) */
+.mn-btn-nova {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    width: 64px; height: 64px; border-radius: 12px; flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5); font-size: 9px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;
+    transition: background .15s;
+}
+.mn-btn-nova:hover { background: rgba(255,255,255,0.08); }
+.mn-btn-nova:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Toggles inline */
+.mn-toggle-inline {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.55);
+}
+
+/* Info box */
+.mn-info-box {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 10px;
+    background: rgba(200,40,48,0.1); border: 1px solid rgba(200,40,48,0.25);
+    color: #ff8080; font-size: 13px;
+}
+
+/* Empty state */
+.mn-empty-state {
+    text-align: center; padding: 20px;
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 10px; font-size: 13px;
+    color: rgba(255,255,255,0.25);
+}
+
+/* Erro */
+.mn-error-box {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 10px;
+    background: rgba(200,40,48,0.15); border: 1px solid rgba(200,40,48,0.3);
+    color: #ff8080; font-size: 13px; font-weight: 600;
+}
+
+/* Transição */
+.mn-modal-enter-active, .mn-modal-leave-active { transition: opacity .2s ease, transform .2s ease; }
+.mn-modal-enter-from, .mn-modal-leave-to { opacity: 0; transform: scale(.97); }
 </style>
