@@ -22,6 +22,11 @@ class CustomerAuth
             return response()->json(['message' => 'Não autenticado.'], 401);
         }
 
+        if ($pat->expires_at && now()->isAfter($pat->expires_at)) {
+            $pat->delete();
+            return response()->json(['message' => 'Sessão expirada. Faça login novamente.'], 401);
+        }
+
         $pat->forceFill(['last_used_at' => now()])->save();
 
         $request->setUserResolver(fn () => $pat->tokenable);

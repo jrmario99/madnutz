@@ -249,7 +249,6 @@
             </Transition>
         </Teleport>
 
-        <ConfirmDialog />
     </div>
 </template>
 
@@ -262,9 +261,8 @@ import InputNumber from 'primevue/inputnumber';
 import ToggleSwitch from 'primevue/toggleswitch';
 import Select from 'primevue/select';
 import ImageUpload from '../../components/ImageUpload.vue';
-import ConfirmDialog from 'primevue/confirmdialog';
-import { useConfirm } from 'primevue/useconfirm';
-import { useToast } from 'primevue/usetoast';
+import { useConfirmDialog as useConfirm } from '../../composables/useConfirmDialog.js';
+import { useToast } from '../../composables/useToast.js';
 import { useAdminApi } from '../../composables/useAdminApi.js';
 
 const api     = useAdminApi();

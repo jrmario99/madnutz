@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../stores/auth.js';
 import { useCustomer } from '../stores/customer.js';
+import { useSettingsStore } from '../stores/settings.js';
 
 const routes = [
     // Public routes (wrapped in AppLayout)
@@ -85,6 +86,12 @@ const routes = [
             },
         ],
     },
+    // Páginas de erro
+    {
+        path: '/erro/:code',
+        name: 'error',
+        component: () => import('../pages/errors/ErrorPage.vue'),
+    },
     // Admin login (standalone, no layout)
     {
         path: '/admin/login',
@@ -124,7 +131,19 @@ const routes = [
                 name: 'admin.coupons',
                 component: () => import('../pages/admin/CouponsPage.vue'),
             },
+            {
+                path: 'configuracoes',
+                name: 'admin.settings',
+                component: () => import('../pages/admin/SettingsPage.vue'),
+            },
         ],
+    },
+    // Catch-all → 404
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'not-found',
+        component: () => import('../pages/errors/ErrorPage.vue'),
+        props: { code: '404' },
     },
 ];
 
@@ -134,9 +153,10 @@ const router = createRouter({
     scrollBehavior: () => ({ top: 0 }),
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
     const auth     = useAuthStore();
     const { isLoggedIn } = useCustomer();
+    const { customKitEnabled, load: loadSettings } = useSettingsStore();
 
     // Admin guards
     if (to.meta.requiresAdmin && !auth.isAdmin.value) {
@@ -152,6 +172,12 @@ router.beforeEach((to) => {
     }
     if (to.meta.customerGuest && isLoggedIn.value) {
         return { name: 'customer.orders' };
+    }
+
+    // Block custom kit route if disabled
+    if (to.name === 'custom.kit') {
+        await loadSettings();
+        if (!customKitEnabled.value) return { name: 'home' };
     }
 });
 

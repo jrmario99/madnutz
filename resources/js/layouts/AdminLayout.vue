@@ -55,16 +55,12 @@
             </div>
         </main>
 
-        <Toast />
-        <ConfirmDialog />
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import Toast from 'primevue/toast';
-import ConfirmDialog from 'primevue/confirmdialog';
 import { useAuthStore } from '../stores/auth.js';
 
 const route  = useRoute();
@@ -72,11 +68,12 @@ const router = useRouter();
 const { user, logout } = useAuthStore();
 
 const menu = [
-    { label: 'Dashboard', to: '/admin/dashboard', icon: 'pi pi-chart-bar' },
-    { label: 'Produtos',  to: '/admin/produtos',  icon: 'pi pi-box' },
-    { label: 'Kits',      to: '/admin/kits',      icon: 'pi pi-gift' },
-    { label: 'Pedidos',   to: '/admin/pedidos',   icon: 'pi pi-shopping-cart' },
-    { label: 'Cupons',    to: '/admin/cupons',    icon: 'pi pi-tag' },
+    { label: 'Dashboard',      to: '/admin/dashboard',      icon: 'pi pi-chart-bar' },
+    { label: 'Produtos',       to: '/admin/produtos',       icon: 'pi pi-box' },
+    { label: 'Kits',           to: '/admin/kits',           icon: 'pi pi-gift' },
+    { label: 'Pedidos',        to: '/admin/pedidos',        icon: 'pi pi-shopping-cart' },
+    { label: 'Cupons',         to: '/admin/cupons',         icon: 'pi pi-tag' },
+    { label: 'Configurações',  to: '/admin/configuracoes',  icon: 'pi pi-cog' },
 ];
 
 const titles = {
@@ -85,6 +82,7 @@ const titles = {
     'admin.kits':      'Kits',
     'admin.orders':    'Pedidos',
     'admin.coupons':   'Cupons',
+    'admin.settings':  'Configurações',
 };
 const pageTitle = computed(() => titles[route.name] ?? 'Admin');
 

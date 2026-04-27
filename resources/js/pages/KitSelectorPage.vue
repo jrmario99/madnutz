@@ -376,52 +376,6 @@ function handleCta() {
                         </div>
                     </div>
 
-                    <!-- Slot info + contador -->
-                    <div v-if="currentSlotObj">
-                        <div class="flex items-center justify-between mb-3">
-                            <p class="text-sm font-bold uppercase tracking-widest" style="color:rgba(255,255,255,0.6);">
-                                {{ currentSlotObj.quantity }}× {{ currentSlotObj.size }}
-                                <span v-if="(kit.slots?.length ?? 0) > 1"
-                                      class="font-normal" style="color:rgba(255,255,255,0.3);">
-                                    &nbsp;· Etapa {{ currentSlot + 1 }}/{{ kit.slots.length }}
-                                </span>
-                            </p>
-                            <span class="text-xs px-2.5 py-1 rounded-full font-bold"
-                                  :style="currentSlotComplete
-                                      ? 'background:rgba(0,200,100,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)'
-                                      : 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.08)'">
-                                {{ currentSlotCount }}/{{ currentSlotObj.quantity }}
-                            </span>
-                        </div>
-
-                        <!-- Progress balls -->
-                        <div class="flex items-center gap-2 mb-4">
-                            <div v-for="bi in currentSlotObj.quantity" :key="bi"
-                                 class="slot-ball relative overflow-hidden"
-                                 :class="{ 'ball-pop': animatingBalls[`${currentSlot}-${bi - 1}`] }"
-                                 :style="(() => {
-                                     const exp    = expandedSelections(currentSlot);
-                                     const filled = (bi - 1) < exp.length;
-                                     const color  = filled ? flavorColor(exp[bi - 1]?.name) : null;
-                                     return filled ? `border-color:${color.border};box-shadow:0 0 14px ${color.glow}` : '';
-                                 })()">
-                                <div class="ball-fill absolute bottom-0 left-0 right-0"
-                                     :style="(() => {
-                                         const exp    = expandedSelections(currentSlot);
-                                         const filled = (bi - 1) < exp.length;
-                                         const color  = filled ? flavorColor(exp[bi - 1]?.name) : null;
-                                         const pct    = filled ? ballFillPercent(bi - 1, currentSlotObj.quantity) : 0;
-                                         return `height:${pct}%;background:${filled ? color.fill : 'transparent'}`;
-                                     })()" />
-                                <span class="relative z-10 text-[10px] font-black leading-none"
-                                      :style="(bi - 1) < expandedSelections(currentSlot).length
-                                          ? 'color:rgba(255,255,255,0.9)'
-                                          : 'color:rgba(255,255,255,0.2)'">
-                                    {{ bi }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Flavor list para o slot atual -->
                     <div v-if="loadingProducts" class="flex items-center justify-center py-8">

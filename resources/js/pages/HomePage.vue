@@ -3,9 +3,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import FavoriteButton from '../components/FavoriteButton.vue';
+import { useSettingsStore } from '../stores/settings.js';
 
 const router = useRouter();
 const kits   = ref([]);
+const { customKitEnabled, load: loadSettings } = useSettingsStore();
 
 // ── Carousel ─────────────────────────────────────────────────────────────────
 const CARD_GAP = 24;
@@ -30,7 +32,7 @@ let dragStartX = 0;
 
 const allKits = computed(() => [
     ...kits.value,
-    { __custom: true, name: 'Personalizado', id: null },
+    ...(customKitEnabled.value ? [{ __custom: true, name: 'Personalizado', id: null }] : []),
 ]);
 
 const progress = computed(() => {
@@ -122,6 +124,7 @@ function pauseAuto() { clearInterval(autoTimer); }
 function resumeAuto() { startAuto(); }
 
 onMounted(async () => {
+    await loadSettings();
     try {
         const res = await axios.get('/api/kits');
         kits.value = res.data;

@@ -14,6 +14,26 @@ function persist() {
     }
 }
 
+// Instância axios compartilhada com interceptor 401
+const http = axios.create({ baseURL: '/api' });
+
+http.interceptors.request.use(cfg => {
+    if (token.value) cfg.headers.Authorization = `Bearer ${token.value}`;
+    return cfg;
+});
+
+http.interceptors.response.use(
+    r => r,
+    err => {
+        if (err.response?.status === 401) {
+            token.value    = null;
+            customer.value = null;
+            persist();
+        }
+        return Promise.reject(err);
+    }
+);
+
 export function useCustomer() {
     const isLoggedIn = computed(() => !!token.value);
 
@@ -25,7 +45,7 @@ export function useCustomer() {
 
     function logout() {
         if (token.value) {
-            api().post('/customer/auth/logout').catch(() => {});
+            http.post('/customer/auth/logout').catch(() => {});
         }
         token.value    = null;
         customer.value = null;
@@ -35,19 +55,16 @@ export function useCustomer() {
     async function fetchMe() {
         if (!token.value) return;
         try {
-            const res  = await api().get('/customer/auth/me');
+            const res  = await http.get('/customer/auth/me');
             customer.value = res.data;
             persist();
         } catch {
-            logout();
+            // interceptor já faz logout no 401
         }
     }
 
     function api() {
-        return axios.create({
-            baseURL: '/api',
-            headers: token.value ? { Authorization: `Bearer ${token.value}` } : {},
-        });
+        return http;
     }
 
     return { token, customer, isLoggedIn, login, logout, fetchMe, api };

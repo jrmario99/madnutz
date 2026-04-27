@@ -23,7 +23,7 @@ class CustomerAuthController extends Controller
         ]);
 
         $customer = Customer::create($data);
-        $token    = $customer->createToken('customer', ['customer'])->plainTextToken;
+        $token    = $customer->createToken('customer', ['customer'], now()->addDays(30))->plainTextToken;
 
         return response()->json(['token' => $token, 'customer' => $customer], 201);
     }
@@ -41,7 +41,9 @@ class CustomerAuthController extends Controller
             return response()->json(['message' => 'Credenciais inválidas.'], 401);
         }
 
-        $token = $customer->createToken('customer', ['customer'])->plainTextToken;
+        $customer->tokens()->delete();
+
+        $token = $customer->createToken('customer', ['customer'], now()->addDays(30))->plainTextToken;
 
         return response()->json(['token' => $token, 'customer' => $customer]);
     }
@@ -114,7 +116,9 @@ class CustomerAuthController extends Controller
             $customer->update(['email_verified_at' => now()]);
         }
 
-        $token = $customer->createToken('customer', ['customer'])->plainTextToken;
+        $customer->tokens()->delete();
+
+        $token = $customer->createToken('customer', ['customer'], now()->addDays(30))->plainTextToken;
 
         return response()->json(['token' => $token, 'customer' => $customer]);
     }

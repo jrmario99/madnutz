@@ -31,7 +31,10 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = $user->createToken('admin-token')->plainTextToken;
+        // Revoga tokens anteriores antes de criar o novo
+        $user->tokens()->delete();
+
+        $token = $user->createToken('admin-token', ['*'], now()->addHours(8))->plainTextToken;
 
         return response()->json(['token' => $token, 'user' => $user]);
     }

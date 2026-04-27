@@ -94,7 +94,7 @@ import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
 import DatePicker from 'primevue/datepicker';
-import { useToast } from 'primevue/usetoast';
+import { useToast } from '../../composables/useToast.js';
 import { useAdminApi } from '../../composables/useAdminApi.js';
 
 const api   = useAdminApi();

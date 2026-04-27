@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\WebhookController;
 use App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Api\Admin\CouponController as AdminCouponController;
+use App\Http\Controllers\Api\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\Api\Admin\UploadController;
 use App\Http\Controllers\Customer\CustomerAuthController;
 use App\Http\Controllers\Customer\CustomerOrderController;
@@ -19,6 +21,7 @@ use App\Http\Middleware\CustomerAuth;
 use Illuminate\Support\Facades\Route;
 
 // Rotas públicas
+Route::get('settings', [SettingController::class, 'index']);
 Route::post('coupons/validate', [CouponController::class, 'validate']);
 Route::get('kits', [KitController::class, 'index']);
 Route::get('kits/{slug}/products', [KitController::class, 'products']);
@@ -97,4 +100,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
     Route::get('coupons/{id}', [AdminCouponController::class, 'show']);
     Route::put('coupons/{id}', [AdminCouponController::class, 'update']);
     Route::delete('coupons/{id}', [AdminCouponController::class, 'destroy']);
+
+    Route::get('settings', [AdminSettingController::class, 'index']);
+    Route::put('settings', [AdminSettingController::class, 'update']);
 });
