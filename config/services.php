@@ -38,6 +38,7 @@ return [
     'b4you' => [
         'api_key'        => env('B4YOU_API_KEY', ''),
         'webhook_secret' => env('B4YOU_WEBHOOK_SECRET', ''),
+        'base_url'       => env('B4YOU_BASE_URL', 'https://api.b4you.com.br/v1'),
     ],
 
 ];

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '../stores/cart.js';
 import { useFavorites } from '../stores/favorites.js';
@@ -18,18 +18,7 @@ onMounted(loadFavorites);
 
 function navTo(anchor) {
     menuOpen.value = false;
-    const scroll = () => {
-        const el = document.querySelector(anchor);
-        if (!el) return;
-        const headerHeight = 64;
-        const top = el.getBoundingClientRect().top + window.scrollY - headerHeight;
-        window.scrollTo({ top, behavior: 'smooth' });
-    };
-    if (router.currentRoute.value.path !== '/') {
-        router.push('/').then(() => setTimeout(scroll, 150));
-    } else {
-        scroll();
-    }
+    router.push({ path: '/', hash: anchor });
 }
 </script>
 
@@ -169,7 +158,7 @@ function navTo(anchor) {
                         <h4 class="font-black uppercase text-white text-sm tracking-widest mb-4"
                             style="font-family:'Passion One',sans-serif">Contato</h4>
                         <ul class="space-y-2 text-sm text-white/80 font-semibold uppercase">
-                            <li>(85) 92001-8141</li>
+                            <li>(85) 99249-2148</li>
                             <li>contato@comanutz.com.br</li>
                         </ul>
                     </div>

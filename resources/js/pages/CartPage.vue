@@ -44,6 +44,10 @@ function openEditCustom(item) {
 function hasSelections(item) {
     return item.is_kit && item.kit_selections?.length > 0;
 }
+
+function goToProducts() {
+    router.push({ path: '/', hash: '#produtos1' });
+}
 </script>
 
 <template>
@@ -90,11 +94,11 @@ function hasSelections(item) {
                        style="font-family:'Passion One',sans-serif;">Carrinho vazio</p>
                     <p style="color:rgba(255,255,255,0.4);">Escolha um kit incrível e volte aqui!</p>
                 </div>
-                <router-link to="/"
+                <button @click="goToProducts"
                     class="px-8 py-3 rounded-xl font-black uppercase tracking-widest text-sm transition-all"
                     style="background:#FF003C;color:#fff;box-shadow:0 4px 20px rgba(255,0,60,0.4);">
                     VER KITS
-                </router-link>
+                </button>
             </div>
 
             <!-- ── CONTEÚDO ── -->

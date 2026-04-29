@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class OrderController extends Controller
@@ -66,10 +67,58 @@ class OrderController extends Controller
                 ]);
             }
 
+            $checkoutUrl = $this->createB4YouCheckout($order, $data);
+
             return response()->json([
                 'order_number' => $order->number,
                 'total'        => $order->total,
+                'checkout_url' => $checkoutUrl,
             ], 201);
         });
+    }
+
+    private function createB4YouCheckout(Order $order, array $data): ?string
+    {
+        $apiKey = config('services.b4you.api_key');
+        if (!$apiKey) return null;
+
+        $baseUrl = config('services.b4you.base_url', 'https://api.b4you.com.br/v1');
+        $appUrl  = config('app.url');
+
+        try {
+            $response = Http::withToken($apiKey)
+                ->withoutVerifying()
+                ->timeout(15)
+                ->post("{$baseUrl}/checkout", [
+                    'order_ref' => $order->number,
+                    'amount'    => (int) round($order->total * 100),
+                    'customer'  => [
+                        'name'  => $data['customer_name'],
+                        'email' => $data['customer_email'],
+                        'phone' => $data['customer_phone'],
+                    ],
+                    'items' => collect($data['items'])->map(fn($i) => [
+                        'title'    => $i['name'],
+                        'quantity' => $i['qty'],
+                        'price'    => (int) round($i['price'] * 100),
+                    ])->values()->all(),
+                    'webhook_url' => "{$appUrl}/api/webhooks/b4you",
+                    'success_url' => "{$appUrl}/pedido-confirmado?ref={$order->number}",
+                    'cancel_url'  => "{$appUrl}/carrinho",
+                ]);
+
+            if ($response->successful()) {
+                return $response->json('checkout_url');
+            }
+
+            \Illuminate\Support\Facades\Log::error('B4You checkout failed', [
+                'status' => $response->status(),
+                'body'   => $response->body(),
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('B4You request error: ' . $e->getMessage());
+        }
+
+        return null;
     }
 }

@@ -181,24 +181,24 @@ function openCustomKit() {
         </section>
 
         <!-- Quem somos -->
-        <section id="quem-somos" class="bg-mn-red text-white py-20 px-4">
-            <div class="max-w-6xl mx-auto space-y-20">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <section id="quem-somos" class="bg-mn-red text-white py-10 sm:py-16 px-4">
+            <div class="max-w-6xl mx-auto space-y-14">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                     <div class="relative">
                         <img
                             src="https://madnutz.com.br/wp-content/uploads/2026/01/Star-3.png"
                             alt=""
-                            class="absolute -top-8 right-0 w-32 opacity-60 pointer-events-none"
+                            class="absolute -top-8 right-0 w-28 opacity-60 pointer-events-none"
                         />
                         <h2
-                            class="text-5xl md:text-6xl font-semibold uppercase leading-tight mb-6"
+                            class="text-2xl sm:text-3xl md:text-5xl font-semibold uppercase leading-tight mb-5"
                             style="font-family: 'Passion One', sans-serif;"
                         >
-                            NÃO É SÓ SNACK.<br>
-                            É MADNUTZ: OUSADO,<br>
+                            NÃO É SÓ SNACK.<br class="hidden sm:block">
+                            É MADNUTZ: OUSADO,<br class="hidden sm:block">
                             INTENSO, SEM MEIO-TERMO
                         </h2>
-                        <p class="text-white/80 text-lg leading-relaxed">
+                        <p class="text-white/80 text-base leading-relaxed">
                             MadNutz é pra quem não aceita snack sem graça. Se o básico já não te satisfaz,
                             você acabou de encontrar outra coisa. Mais intenso. Mais viciante. Muito mais Mad.
                         </p>
@@ -207,33 +207,34 @@ function openCustomKit() {
                         <img
                             src="https://madnutz.com.br/wp-content/uploads/2026/02/super-lemon.webp"
                             alt="MadNutz Super Lemon"
-                            class="w-full max-w-xs object-contain drop-shadow-2xl"
-                            style="transform: rotate(-12deg);"
+                            class="w-full object-contain drop-shadow-2xl"
+                            style="transform: rotate(-12deg); max-width: 228px;"
                         />
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
                     <div class="flex justify-center order-2 md:order-1">
                         <img
                             src="https://madnutz.com.br/wp-content/uploads/2026/01/Group-7-e1769696498413.png"
                             alt="MadNutz produto na bandeja"
-                            class="w-full max-w-md object-contain drop-shadow-2xl"
+                            class="w-full object-contain drop-shadow-2xl"
+                            style="max-width: 340px;"
                         />
                     </div>
                     <div class="order-1 md:order-2">
                         <h2
-                            class="text-5xl md:text-6xl font-semibold uppercase leading-tight mb-6"
+                            class="text-2xl sm:text-3xl md:text-5xl font-semibold uppercase leading-tight mb-5"
                             style="font-family: 'Passion One', sans-serif;"
                         >
                             FEITO PRA QUEM QUEBRA PADRÕES
                         </h2>
-                        <p class="text-white/80 text-lg leading-relaxed mb-4">
+                        <p class="text-white/80 text-base leading-relaxed mb-3">
                             Esqueça o que você achava que era um snack normal. MadNutz não
                             nasceu pra ser só mais uma opção. Chega do sem graça, do previsível,
                             do que não provoca nada.
                         </p>
-                        <p class="text-white/80 text-lg leading-relaxed">
+                        <p class="text-white/80 text-base leading-relaxed">
                             Isso aqui é sabor com atitude. Daqueles que chegam sem pedir licença.
                             Experimente e descubra por que, depois de MadNutz, o básico já não basta.
                         </p>
@@ -288,7 +289,7 @@ function openCustomKit() {
         </section>
 
         <!-- ──────────── KITS: dark carousel ──────────── -->
-        <section id="produtos1" class="relative overflow-hidden" style="background:#0f0f0f;">
+        <section id="produtos1" class="relative overflow-hidden bg-mn-red">
 
             <!-- Progress line -->
             <div style="height:3px;background:rgba(255,255,255,0.06);">
@@ -347,12 +348,6 @@ function openCustomKit() {
                                         🔥 {{ kit.badge }}
                                     </div>
 
-                                    <!-- Favorite -->
-                                    <FavoriteButton v-if="!kit.__custom"
-                                                    type="kit" :item-id="kit.id"
-                                                    size="sm"
-                                                    class="absolute top-3 right-3 z-10"
-                                                    @click.stop />
 
                                     <!-- Image / custom area -->
                                     <div class="flex items-center justify-center"

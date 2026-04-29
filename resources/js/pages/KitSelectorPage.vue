@@ -247,7 +247,7 @@ function handleCta() {
                      grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
             <!-- ── LEFT: Image (sticky on desktop) ── -->
-            <div class="relative w-full aspect-square rounded-xl overflow-hidden group lg:sticky lg:top-24"
+            <div class="relative w-full aspect-[4/3] sm:aspect-square rounded-xl overflow-hidden group lg:sticky lg:top-24"
                  style="background:rgba(18,18,18,0.7);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);">
 
                 <div class="absolute inset-0 z-0 pointer-events-none"
@@ -384,7 +384,7 @@ function handleCta() {
                     </div>
                     <div v-else class="flex flex-col gap-2">
                         <div v-for="product in productsForCurrentSlot" :key="product.id"
-                             class="rounded-lg flex items-center justify-between gap-4 cursor-pointer transition-all duration-300"
+                             class="rounded-lg flex items-center justify-between gap-2 sm:gap-4 cursor-pointer transition-all duration-300"
                              style="padding:12px;backdrop-filter:blur(20px);"
                              :style="(selections[currentSlot]?.[product.id] || 0) > 0
                                  ? 'background:rgba(18,18,18,0.7);border:1px solid rgba(255,82,92,0.4);box-shadow:0 0 12px rgba(255,0,60,0.1)'
@@ -393,8 +393,8 @@ function handleCta() {
                                  ? increment(currentSlot, product.id, currentSlotObj.quantity)
                                  : null">
 
-                            <div class="flex items-center gap-3">
-                                <div class="w-16 h-16 rounded overflow-hidden flex-shrink-0"
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <div class="w-12 h-12 sm:w-16 sm:h-16 rounded overflow-hidden flex-shrink-0"
                                      style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
                                     <img v-if="product.thumbnail"
                                          :src="product.thumbnail" :alt="product.name"
